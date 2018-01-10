@@ -2,8 +2,13 @@ package com.process.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.acls.domain.BasePermission;
+import org.springframework.security.acls.domain.ObjectIdentityImpl;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.MutableAclService;
+import org.springframework.security.acls.model.ObjectIdentity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +19,7 @@ import com.process.demo.model.Ropa;
 import com.process.demo.model.User;
 import com.process.demo.repository.RopaRepository;
 import com.process.demo.repository.UserRepository;
+import com.process.demo.service.CustomPermission;
 import com.process.demo.service.CustomService;
 import com.process.demo.service.CustomServiceImpl;
 import com.process.demo.service.LocalPermissionService;
@@ -31,13 +37,15 @@ public class RopaController {
 
     @Autowired
     private UserRepository userRepository;
-
+    
+    @Autowired
+    private MutableAclService aclService;
+    
     @Autowired
     private LocalPermissionService permissionService;
     
     @Autowired
     private CustomServiceImpl CustomServiceImpl;
-    // API
     
     @RequestMapping
     public ModelAndView list() {
@@ -47,12 +55,16 @@ public class RopaController {
     
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     @ResponseBody
-    @PostAuthorize("hasPermission(returnObject, 'READ') or hasPermission(returnObject, 'ADMINISTRATION')")
+    @PostAuthorize("hasPermission(returnObject, 'READ') "
+    		+ "or hasPermission(returnObject, 'ADMINISTRATION') "
+    		+ "or hasPermission(returnObject, 'OWNER_CRU')")
     public Ropa findOne(@PathVariable("id") final Long id) {
         return ropaRepository.findOne(id);
     }
     
-    @PreAuthorize("hasPermission(#ropa, 'WRITE') or hasPermission(#ropa, 'ADMINISTRATION')")
+    @PreAuthorize("hasPermission(#ropa, 'WRITE') "
+    		+ "or hasPermission(#ropa, 'ADMINISTRATION') "
+    		+ "or hasPermission(#ropa, 'OWNER_CRU')")
     @RequestMapping(value = "modify/{id}", method = RequestMethod.GET)
     public ModelAndView modifyForm(@PathVariable("id") final Ropa ropa) {
         return new ModelAndView("tl/edit", "ropa", ropa);
@@ -63,28 +75,34 @@ public class RopaController {
     	Ropa deletedRopa = ropaRepository.findOne(id);
     	if(CustomServiceImpl.delete(deletedRopa)) {
     		ropaRepository.delete(deletedRopa);
+    		//update acl_object_identity
+    		final ObjectIdentity oi = new ObjectIdentityImpl(deletedRopa.getClass(), deletedRopa.getId());
+    		MutableAcl acl = (MutableAcl) aclService.readAclById(oi);
+    		aclService.deleteAcl(oi, true);
     	}
         return new ModelAndView("redirect:/ropa");
     }
-    
-//    @PreAuthorize("hasPermission(#ropa, 'ADMINISTRATION')")
-//    @RequestMapping(value="/deleteall", method=RequestMethod.DELETE)
-//    public void deleteAll() {
-//    		ropaRepository.deleteAll();
-//    }
 	
+    @PostAuthorize("hasPermission(#ropa, 'CREATE') "
+    		+ "or hasPermission(#ropa, 'ADMINISTRATION') "
+    		+ "or hasPermission(#ropa, 'OWNER_CRU')")
     @RequestMapping(method = RequestMethod.POST)
     public ModelAndView create(@Valid Ropa ropa, Authentication authentication) {
-    	ropa.setOwner(userRepository.findByEmail(authentication.getName()));
     	ropa = ropaRepository.save(ropa);
         System.out.println(ropa);
-        // permissionService.addPermissionForAuthority(ropa, BasePermission.ADMINISTRATION, "ADMIN");
-        permissionService.addPermissionForUser(ropa, BasePermission.ADMINISTRATION, authentication.getName());
+        if(ropa.getOwner().getRoleId().equals("procedure_owner")) {
+        	permissionService.addPermissionForAuthority(ropa, CustomPermission.OWNER_CRU, "ROLE_PO");
+        } else if(ropa.getOwner().getRoleId().equals("admin")) {
+        	permissionService.addPermissionForAuthority(ropa, BasePermission.ADMINISTRATION, "ROLE_ADMIN");
+        }
+        	
         return new ModelAndView("redirect:/ropa?message=Ropa with id " + ropa.getId());
     }
 
-    //
-
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_PO')")
+//    @PreAuthorize("hasPermission(#ropa, 'CREATE') "
+//    		+ "or hasPermission(#ropa, 'ADMINISTRATION') "
+//    		+ "or hasPermission(returnObject, 'OWNER_CRU')")
     @RequestMapping(params = "form", method = RequestMethod.GET)
     public String createForm(@ModelAttribute final Ropa ropa) {
         return "tl/ropa";

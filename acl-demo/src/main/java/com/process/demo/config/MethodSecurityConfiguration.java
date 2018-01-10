@@ -7,18 +7,31 @@ import org.springframework.cache.ehcache.EhCacheFactoryBean;
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
+import org.springframework.security.access.vote.AffirmativeBased;
+import org.springframework.security.acls.AclEntryVoter;
 import org.springframework.security.acls.AclPermissionEvaluator;
 import org.springframework.security.acls.domain.*;
 import org.springframework.security.acls.jdbc.BasicLookupStrategy;
 import org.springframework.security.acls.jdbc.JdbcMutableAclService;
 import org.springframework.security.acls.jdbc.LookupStrategy;
 import org.springframework.security.acls.model.AclCache;
+import org.springframework.security.acls.model.Permission;
 import org.springframework.security.acls.model.PermissionGrantingStrategy;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import com.process.demo.service.CustomPermission;
+import com.process.demo.service.CustomPermissionFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -44,6 +57,7 @@ public class MethodSecurityConfiguration extends GlobalMethodSecurityConfigurati
     @Bean
     public AclPermissionEvaluator aclPermissionEvaluator() {
         final AclPermissionEvaluator aclPermissionEvaluator = new AclPermissionEvaluator(aclService());
+        aclPermissionEvaluator.setPermissionFactory(customPermissionFactory());
         return aclPermissionEvaluator;
     }
 
@@ -65,7 +79,11 @@ public class MethodSecurityConfiguration extends GlobalMethodSecurityConfigurati
     // lookup strategy
     @Bean
     public LookupStrategy lookupStrategy() {
-        return new BasicLookupStrategy(dataSource(), aclCache(), aclAuthorizationStrategy(), permissionGrantingStrategy());
+        BasicLookupStrategy basicLookupStrategy = 
+        		new BasicLookupStrategy(dataSource(), aclCache(), aclAuthorizationStrategy(), permissionGrantingStrategy());
+        //  add custom permission
+        basicLookupStrategy.setPermissionFactory(customPermissionFactory());
+        return basicLookupStrategy;
     }
 
     // cache
@@ -89,7 +107,7 @@ public class MethodSecurityConfiguration extends GlobalMethodSecurityConfigurati
     // which deals with access administrative methods
     @Bean
     public AclAuthorizationStrategy aclAuthorizationStrategy() {
-        return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ADMIN"));
+        return new AclAuthorizationStrategyImpl(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
 
     // this allows us to actually customize the decision to grant a permission (or not) based on the ACL entry
@@ -104,4 +122,35 @@ public class MethodSecurityConfiguration extends GlobalMethodSecurityConfigurati
     public DataSource dataSource() {
         return DataSourceBuilder.create().build();
     }
+    
+    // custom permission
+    @Bean
+    public CustomPermissionFactory customPermissionFactory() {  
+    	return new CustomPermissionFactory();
+    } 
+    
+    // custom entry voter
+    @Bean 
+    public AclEntryVoter aclEntryVoter() {
+    	Permission[] requirePermission = new Permission[1];
+    	requirePermission[0] = CustomPermission.OWNER_CRU;
+    	AclEntryVoter aclEntryVoter = new AclEntryVoter(aclService(), "OWNER_CRU", requirePermission);
+    	return aclEntryVoter;
+    }
+    
+    // custom decision manager
+	@Bean
+    public AffirmativeBased aclDecisionManager() {
+    	List<AccessDecisionVoter<? extends Object>> decisionVoters = new ArrayList<>();
+    	decisionVoters.add(0, aclEntryVoter());
+    	AffirmativeBased aclDecisionManager = new AffirmativeBased(decisionVoters);
+    	return aclDecisionManager;
+    }
 }
+
+
+
+
+
+
+

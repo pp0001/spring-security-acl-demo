@@ -17,13 +17,13 @@
             <input type="hidden" th:field="*{id}" th:class="${#fields.hasErrors('id')} ? 'field-error'" />
 
             <label for="email">Email</label>
-            <input type="email" readonly="readonly" th:field="*{email}" th:class="${#fields.hasErrors('email')} ? 'field-error'" />
+            <input type="email" th:field="*{email}" th:class="${#fields.hasErrors('email')} ? 'field-error'" />
             
             <label for="password">Password</label>
             <input type="password" th:field="*{password}" th:class="${#fields.hasErrors('password')} ? 'field-error'" />
             
             <label for="roleId">Role ID</label>
-            <input type="text" readonly="readonly" th:field="*{roleId}" th:class="${#fields.hasErrors('roleId')} ? 'field-error'"/>
+            <input type="text" th:field="*{roleId}" th:class="${#fields.hasErrors('roleId')} ? 'field-error'"/>
             
             <div class="form-actions">
                 <input type="submit" value="Save" />

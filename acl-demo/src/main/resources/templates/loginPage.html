@@ -11,9 +11,15 @@
 <body>
     <div class="container">
         <h1>Login page</h1>
-        <p>procedure_owner1: user1@mail.com / user1</p>
-		<p>procedure_owner2: user2@mail.com / user2</p>
-		<p>employee: user3@mail.com / user3</p>
+    	<br/>
+    	<hr/>
+    	<br/>
+        <p>Procedure Owner: user1@mail.com / user1  user2@mail.com / user2</p>
+		<p>Admin: user3@mail.com / user3</p>
+		<p>Employee: user4@mail.com / user4</p>
+		<br/>
+    	<hr/>
+    	<br/>
         <div th:if="${param.error}" th:text="${session.SPRING_SECURITY_LAST_EXCEPTION.message}" class="alert alert-danger">Login Error</div>
         <div th:if="${message}" th:text="${message}" class="alert alert-success">Message</div>
         <div th:if="${errorMessage}" th:text="${errorMessage}" class="alert alert-danger">Error Message</div>

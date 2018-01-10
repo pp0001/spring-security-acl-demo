@@ -28,8 +28,8 @@ public interface CustomService {
 //	@PreAuthorize("hasPermission(#ropa, 'WRITE')")
 //	public Boolean edit(Ropa ropa);
 
-//	@PreAuthorize("hasPermission(#ropa, 'DELETE') or hasPermission(#ropa, 'ADMINISTRATION')")
-	@PreAuthorize("hasPermission(#ropa, 'DELETE')")
+	@PreAuthorize("hasPermission(#ropa, 'DELETE') "
+			+ "or hasPermission(#ropa, 'ADMINISTRATION') ")
 	public Boolean delete(Ropa ropa);
 
 }

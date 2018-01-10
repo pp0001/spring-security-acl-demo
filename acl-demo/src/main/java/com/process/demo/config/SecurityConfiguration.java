@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
@@ -17,8 +18,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         super();
     }
 
-    //
-
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {// @formatter:off
         auth.userDetailsService(userDetailsService);
@@ -28,6 +27,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {// @formatter:off
         http
         .authorizeRequests()
+//        		.antMatchers("/ropa/modify/**").hasRole("ADMIN")
+//        		.antMatchers("/ropa/delete/**").hasRole("ADMIN")
+//        		.antMatchers("ropa/*").hasRole("USER")
                 .antMatchers("/badUser*",
                         "/js/**").permitAll()
                 .anyRequest().authenticated()

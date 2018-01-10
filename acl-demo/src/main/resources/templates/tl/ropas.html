@@ -29,6 +29,7 @@
             <td>
             		<a th:href="@{'/ropa/delete/' + ${ropa.id}}" th:text="Delete"></a>
             		<a th:href="@{'/ropa/modify/' + ${ropa.id}}" th:text="Edit"></a>
+            		<a th:href="@{'/ropa/' + ${ropa.id}}" th:text="View"></a>
             	</td>
         </tr>     
         </tbody>
@@ -37,8 +38,6 @@
     <hr/>
     <br/>
     <div>
-        <a href="ropa.html" th:href="@{/ropa/(form)}" class="pull-right">Create Ropa</a>
-		<br/>
         Find Ropa by id <input id="pId" type="number" name="pId"/> <button onclick="getRopa()">Find</button>
         <br/><div id="result"></div>
     </div>
