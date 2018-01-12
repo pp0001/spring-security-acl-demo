@@ -1,6 +1,9 @@
 package com.process.demo.model;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -14,10 +17,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
+
+import javassist.bytecode.Descriptor.Iterator;
 
 @Entity
 @Table(name = "ropa")
@@ -46,10 +52,12 @@ public class Ropa implements LocalEntity{
 //	@Version
 //	private Timestamp updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
-
+//    @ManyToOne
+//  private User owner;
+	
+//	@ManyToMany( mappedBy = "ropa")
+	@OneToMany(cascade = CascadeType.ALL)
+	private Set<User> owner;
 
 	public Long getId() {
 		return id;
@@ -66,19 +74,28 @@ public class Ropa implements LocalEntity{
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-    public User getOwner() {
+
+    public Set<User> getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
-        this.owner = owner;
+    public void setOwner(Set<User> user) {
+    	this.owner = user;
     }
     
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("Ropa [id=").append(id).append(", name=").append(name).append(", owner=").append(owner).append("]");
+        builder.append("Ropa [id=").append(id).append(", name=").append(name).append(", owner=");
+        if(owner != null) {
+	        java.util.Iterator<User> iterator = owner.iterator();
+	        while(iterator.hasNext()) {
+	        	builder.append("{");
+	        	builder.append(iterator.next().getRoleId());
+	        	builder.append("}");
+	        }
+        }
+        builder.append("]");
         return builder.toString();
     }
 //	public String getDescription() {

@@ -5,6 +5,10 @@ package com.process.demo.model;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.persistence.*;
 
 @Entity
@@ -26,6 +30,14 @@ public class User {
     
     @NotEmpty(message = "Role Id is required.")
     private String roleId;
+
+//	@ManyToOne(targetEntity = Ropa.class)
+//	public Ropa ropa;
+//    @ManyToMany
+//	@JoinTable(	name="user_ropa",
+//				joinColumns = {@JoinColumn(name="user_id", referencedColumnName = "id")}, 
+//				inverseJoinColumns = {@JoinColumn(name = "ropa_id", nullable = false, referencedColumnName = "id")})
+//    private Set<Ropa> ropa;
 
     public User() {
         super();
@@ -62,6 +74,14 @@ public class User {
 	public void setRoleId(String roleId) {
 		this.roleId = roleId;
 	}
+    
+//	public Ropa getRopa() {
+//		return ropa;
+//	}
+//
+//	public void setRopa(Ropa ropa) {
+//		this.ropa = ropa;
+//	}
 
 	@Override
     public int hashCode() {

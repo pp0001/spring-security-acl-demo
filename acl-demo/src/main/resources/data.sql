@@ -4,10 +4,15 @@ INSERT INTO User (id, email, password, role_id) VALUES
 (3, 'user3@mail.com', 'user3', 'admin'),
 (4, 'user4@mail.com', 'user4', 'employee');
 
-INSERT INTO Ropa (id, name, owner_id) VALUES
-(1, 'Ropa1', 1),
-(2, 'Ropa2', 1),
-(3, 'Ropa3', 1);
+INSERT INTO Ropa (id, name) VALUES
+(1, 'Ropa1'),
+(2, 'Ropa2'),
+(3, 'Ropa3');
+
+INSERT INTO ropa_owner (id, owner_id, ropa_id) VALUES
+(1, 1, 1),
+(2, 2, 2),
+(3, 3, 3);
 
 INSERT INTO acl_sid (id, principal, sid) VALUES
 (1, 0, 'ROLE_PO'), 		-- procedure_owner == ROLE_PO

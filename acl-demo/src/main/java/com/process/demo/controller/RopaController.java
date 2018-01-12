@@ -24,6 +24,7 @@ import com.process.demo.service.CustomService;
 import com.process.demo.service.CustomServiceImpl;
 import com.process.demo.service.LocalPermissionService;
 
+import java.util.Iterator;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -89,11 +90,14 @@ public class RopaController {
     @RequestMapping(method = RequestMethod.POST)
     public ModelAndView create(@Valid Ropa ropa, Authentication authentication) {
     	ropa = ropaRepository.save(ropa);
-        System.out.println(ropa);
-        if(ropa.getOwner().getRoleId().equals("procedure_owner")) {
-        	permissionService.addPermissionForAuthority(ropa, CustomPermission.OWNER_CRU, "ROLE_PO");
-        } else if(ropa.getOwner().getRoleId().equals("admin")) {
-        	permissionService.addPermissionForAuthority(ropa, BasePermission.ADMINISTRATION, "ROLE_ADMIN");
+        System.out.println(ropa.toString());
+        Iterator<User> ropaIterator = ropa.getOwner().iterator();
+        while(ropaIterator.hasNext()) {
+            if(ropaIterator.next().getRoleId().equals("procedure_owner")) {
+            	permissionService.addPermissionForAuthority(ropa, CustomPermission.OWNER_CRU, "ROLE_PO");
+            } else if(ropaIterator.next().getRoleId().equals("admin")) {
+            	permissionService.addPermissionForAuthority(ropa, BasePermission.ADMINISTRATION, "ROLE_ADMIN");
+            }
         }
         	
         return new ModelAndView("redirect:/ropa?message=Ropa with id " + ropa.getId());

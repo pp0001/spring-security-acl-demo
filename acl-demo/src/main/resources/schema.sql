@@ -1,6 +1,7 @@
 -- MySQL Schema
 USE acldb;
 
+DROP TABLE IF EXISTS ropa_owner;
 DROP TABLE IF EXISTS Ropa;
 DROP TABLE IF EXISTS User;
 DROP TABLE IF EXISTS acl_entry;
@@ -50,7 +51,6 @@ CREATE TABLE acl_entry (
 ) ENGINE=InnoDB;
 
 --
-
 CREATE TABLE User (
   id bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   email varchar(255) DEFAULT NULL,
@@ -60,8 +60,20 @@ CREATE TABLE User (
 
 CREATE TABLE Ropa (
   id bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  name varchar(255) DEFAULT NULL,
-  owner_id bigint(20) NOT NULL,
-  CONSTRAINT fk_possession_owner FOREIGN KEY (owner_id) REFERENCES User (id)
+  name varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB;
+
+CREATE TABLE ropa_owner (
+  id bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  owner_id bigint(20) NOT NULL,
+  ropa_id bigint(20) NOT NULL ,
+  CONSTRAINT fk_userropa_user FOREIGN KEY (owner_id) REFERENCES User (id),
+  CONSTRAINT fk_userropa_ropa FOREIGN KEY (ropa_id) REFERENCES Ropa (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+
+
+
+
 

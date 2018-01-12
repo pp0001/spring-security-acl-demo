@@ -23,9 +23,6 @@ import javax.transaction.Transactional;
 @Transactional
 public class LocalUserDetailsService implements UserDetailsService {
 
-//    private static final String ROLE_USER = "ROLE_USER";
-//    private static final String ROLE_ADMIN = "ROLE_ADMIN";
-
     @Autowired
     private UserRepository userRepository;
 
